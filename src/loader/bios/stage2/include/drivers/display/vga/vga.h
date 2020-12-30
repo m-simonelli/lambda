@@ -1,5 +1,5 @@
 /*
- *  ports.c
+ *  vga.h
  *  Copyright Marco Simonelli 2020
  *  You are free to redistribute/modify this code under the
  *  terms of the GPL version 3 (see the file LICENSE)
@@ -66,5 +66,9 @@ struct vga_cursor_pos {
 
 /* func decls */
 void vga_print(const char *s);
+void vga_init();
+void vga_clear_screen();
+void vga_print_char(char c, char attr);
+void vga_scroll_line();
 
 #endif

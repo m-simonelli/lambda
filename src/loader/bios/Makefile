@@ -27,13 +27,14 @@ BOOTSECT_SRC=	${BOOTSECT_DIR}/bootsect.asm		\
 S2_DIR=stage2
 S2_OUT=stage2.bin
 S2_GEN=
-S2_ASM_SRC=		${S2_DIR}/start.asm
+S2_ASM_SRC=		${S2_DIR}/start.s					\
+				${S2_DIR}/arch/x86/lib/memcpy.s
 S2_C_SRC=		${S2_DIR}/entry.c					\
 				${S2_DIR}/drivers/display/vga/vga.c	\
 				${S2_DIR}/drivers/io/ports.c
 
 S2_SRC=${S2_ASM_SRC} ${S2_C_SRC}
-S2_OBJ=			${S2_ASM_SRC:.asm=.o}	\
+S2_OBJ=			${S2_ASM_SRC:.s=.o}	\
 				${S2_C_SRC:.c=.o}
 S2_SEC_CNT=`wc -c < ${S2_OUT} | awk '{printf("%.0f\n", ($$1+511)/512)}'`
 S2_LD_SCRIPT_GEN=${S2_DIR}/linker.ld.gen
@@ -78,7 +79,7 @@ ${BOOTSECT_OUT}: ${BOOTSECT_SRC}
 ${S2_DIR}/%.o: ${S2_DIR}/%.c
 	${CC} ${CC_FLAGS} -ffreestanding -c $< -o $@
 
-${S2_DIR}/%.o: ${S2_DIR}/%.asm
+${S2_DIR}/%.o: ${S2_DIR}/%.s
 	${AS} -f elf32 $< -o $@
 
 ${S2_LD_SCRIPT}: ${S2_LD_SCRIPT_GEN}
