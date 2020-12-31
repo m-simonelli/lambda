@@ -1,5 +1,4 @@
-all:
-	$(error Please specify either bios or uefi make rule!)
+all: bios uefi
 
 bios:
 	$(MAKE) -C bios
@@ -12,5 +11,10 @@ uefi:
 
 uefi_clean:
 	$(MAKE) -C uefi clean
+
+run_bios:
+	$(MAKE) -C bios run
+run_uefi:
+	$(MAKE) -C uefi run
 
 .PHONY: uefi bios

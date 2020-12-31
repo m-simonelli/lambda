@@ -4,6 +4,7 @@ CC=${PREFIX}-gcc
 # mingw throws a fit if you try and operate on a non pe output
 LD=${PREFIX}-ld
 OBJCOPY=objcopy
+QEMU=qemu-system-x86_64
 
 ARCH= $(shell uname -m | sed s,i[3456789]86,ia32,)
 
@@ -83,19 +84,19 @@ ${OUT_EFI}: ${OUT_LD}
 ${OUT_IMG}: ${OUT_EFI}
 	# todo: size the out img depending on out.efi byte count
 	cp ${OUT_EFI} BOOTX64.EFI
-	dd if=/dev/zero of=$@ bs=1k count=1440
+	dd if=/dev/zero of=$@ bs=1k count=14400
 	mformat -i $@ -f 1440 ::
 	mmd -i $@ ::/EFI
 	mmd -i $@ ::/EFI/BOOT
 	mcopy -i $@ BOOTX64.EFI ::/EFI/BOOT
 
 ${OUT_HDD}: ${OUT_IMG}
-	mkgpt -o ${OUT_HDD} --image-size 4096 --part ${OUT_IMG} --type system
+	mkgpt -o ${OUT_HDD} --image-size 40960 --part ${OUT_IMG} --type system
 
 run_qemu_usb: ${OUT_IMG}
-	qemu-system-x86_64 -L ${QEMU_OVMF_DIR} -pflash ${QEMU_OVMF_DIR}/OVMF.fd -usb -usbdevice disk::${OUT_IMG}
+	${QEMU} -L ${QEMU_OVMF_DIR} -drive if=pflash,format=raw,file=${QEMU_OVMF_DIR}/OVMF.fd -usb -usbdevice disk::${OUT_IMG}
 run_qemu_hdd: ${OUT_HDD}
-	qemu-system-x86_64 -L ${QEMU_OVMF_DIR} -pflash ${QEMU_OVMF_DIR}/OVMF.fd -hda ${OUT_HDD}
+	${QEMU} -L ${QEMU_OVMF_DIR} -drive if=pflash,format=raw,file=${QEMU_OVMF_DIR}/OVMF.fd -drive file=${OUT_HDD},format=raw,index=0,media=disk
 
 run_qemu: run_qemu_hdd
 run: run_qemu

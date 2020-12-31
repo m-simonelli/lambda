@@ -2,6 +2,7 @@ AS=nasm
 PREFIX=x86_64-linux-gnu
 CC=${PREFIX}-gcc
 LD=${PREFIX}-ld
+QEMU=qemu-system-x86_64
 
 OUT_NAME=lambda
 MAJOR_REV=0
@@ -90,12 +91,12 @@ ${S2_OUT}: ${S2_OBJ} ${S2_LD_SCRIPT}
 	${LD} -m elf_i386 -o $@ -T${S2_LD_SCRIPT} ${S2_OBJ}
 
 run_qemu: all
-	qemu-system-x86_64 -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk
+	${QEMU} -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk
 
 run: run_qemu
 
 debug_qemu: all
-	qemu-system-x86_64 -d int -monitor stdio -no-shutdown -no-reboot -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk
+	${QEMU} -d int -monitor stdio -no-shutdown -no-reboot -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk
 
 clean:
 	rm -rf ${BOOTSECT_OUT} ${S2_OUT} ${BOOTSECT_GEN} ${S2_OBJ} ${S2_LD_SCRIPT} ${OUT_BIN}
