@@ -7,9 +7,10 @@ OUT_NAME=lambda
 MAJOR_REV=0
 MINOR_REV=0
 PATCH_REV=0
-RELEASE=-alpha
+RELEASE_TAG=-alpha
+META_TAG=-bios
 
-VER_STR=${OUT_NAME}.${MAJOR_REV}.${MINOR_REV}.${PATCH_REV}${RELEASE}
+VER_STR=${OUT_NAME}.${MAJOR_REV}.${MINOR_REV}.${PATCH_REV}${RELEASE_TAG}${META_TAG}
 OUT_BIN=${VER_STR}.bin
 
 ############## bootsect
@@ -97,7 +98,4 @@ debug_qemu: all
 	qemu-system-x86_64 -d int -monitor stdio -no-shutdown -no-reboot -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk
 
 clean:
-	rm -rf ${BOOTSECT_OUT} ${S2_OUT} ${BOOTSECT_GEN} ${S2_OBJ} ${S2_LD_SCRIPT}
-
-distclean: clean
-	rm -f ${OUT_BIN}
+	rm -rf ${BOOTSECT_OUT} ${S2_OUT} ${BOOTSECT_GEN} ${S2_OBJ} ${S2_LD_SCRIPT} ${OUT_BIN}
