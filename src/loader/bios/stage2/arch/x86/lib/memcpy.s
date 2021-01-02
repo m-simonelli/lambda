@@ -15,24 +15,23 @@ memcpy:
     push ebx
     push edi
     push esi
-    push esp
 
     mov edi, eax ; dest
     mov esi, edx ; src
 
     ; for the case when cnt < 16 bytes
-    cmp ecx, 0x10
+    cmp ecx, 16
     jb .tail
 
     ; check for case 2
     cmp edi, esi
     ja .reverse
     ; predecrement
-    sub ecx, 0x10
+    lea ecx, [ecx - 16]
 
     align 16 ; Assembly/Compiler Coding Rule 12 - All branch targets should be 16-byte aligned.
   .forward_copy_loop:
-    sub ecx, 0x10
+    sub ecx, 16
     ; move in 4x4 groups
     ; load
     mov eax, [esi + 0]
@@ -48,7 +47,7 @@ memcpy:
     lea edi, [edi + 16]
     ; if the sub ecx, 0x10 didn't underflow, loop
     jae .forward_copy_loop
-    add ecx, 0x10
+    lea ecx, [ecx + 16]
     jmp .tail
   
     align 16
@@ -57,11 +56,11 @@ memcpy:
     add edi, ecx
     add esi, ecx
     ; predecrement
-    sub ecx, 0x10
+    lea ecx, [ecx - 16]
 
     align 16
   .reverse_copy_loop:
-    sub ecx, 0x10
+    sub ecx, 16
     ; move in 4x4 groups
     ; load
     mov eax, [esi - 0]
@@ -78,7 +77,7 @@ memcpy:
     jae .reverse_copy_loop
   
     ; .tail only handles forward copy, fix pointers
-    add ecx, 0x10
+    lea ecx, [ecx + 16]
     sub edi, ecx
     sub esi, ecx
 
@@ -87,7 +86,6 @@ memcpy:
     ; it's not really worth doing optimizations here for up to 16 bytes
     rep movsb
     
-    pop esp
     pop esi
     pop edi
     pop ebx

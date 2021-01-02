@@ -35,7 +35,8 @@ S2_DIR=stage2
 S2_OUT=stage2.bin
 S2_GEN=
 S2_ASM_SRC=		${S2_DIR}/start.s					\
-				${S2_DIR}/arch/x86/lib/memcpy.s
+				${S2_DIR}/arch/x86/lib/memcpy.s		\
+				${S2_DIR}/arch/x86/lib/memset.s
 S2_C_SRC=		${S2_DIR}/entry.c					\
 				${S2_DIR}/drivers/display/vga/vga.c	\
 				${S2_DIR}/drivers/io/ports.c
