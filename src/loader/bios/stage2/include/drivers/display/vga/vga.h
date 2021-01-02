@@ -65,7 +65,7 @@ struct vga_cursor_pos {
 #define VGA_COL_BACKGROUND_WHITE 0xf0
 
 /* func decls */
-void vga_print(const char *s);
+void vga_print(const char *const s);
 void vga_init();
 void vga_clear_screen();
 void vga_print_char(char c, char attr);

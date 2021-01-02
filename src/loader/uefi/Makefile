@@ -29,7 +29,8 @@ OUT_HDD=${OUT_EFI:.efi=.bin}
 
 CC_INCLUDES=-I/usr/include/efi			\
 			-I/usr/include/efi/protocol	\
-			-I/usr/include/efi/x86_64
+			-I/usr/include/efi/x86_64	\
+			-Iinclude
 CFLAGS=		-fpic						\
 			-ffreestanding				\
 			-fno-stack-protector		\

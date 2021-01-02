@@ -1,3 +1,10 @@
+/*
+ *  vga.c
+ *  Copyright Marco Simonelli 2020
+ *  You are free to redistribute/modify this code under the
+ *  terms of the GPL version 3 (see the file LICENSE)
+ */
+
 #include <drivers/display/vga/vga.h>
 #include <drivers/io/ports.h>
 #include <lib/memcpy.h>
@@ -5,9 +12,13 @@
 
 static bool vga_did_init = false;
 static char *const vga_mem = (char*)VGA_MEM;
-static struct vga_cursor_pos vga_cursor_pos = {0};
+static struct vga_cursor_pos vga_cursor_pos = {
+    .x = 0,
+    .y = 0
+};
 
 void vga_init() {
+    if (vga_did_init) return;
     vga_did_init = true;
 
     /* Disable the hardware cursor */
@@ -67,7 +78,7 @@ void vga_scroll_line() {
     for (int i = 0; i < VGA_MAX_COLS; i++) vga_mem[(VGA_MAX_ROWS + i) * 2] = 0;
 }
 
-void vga_print(const char *s) {
+void vga_print(const char *const s) {
     unsigned long int i = 0;
     while (s[i]) vga_print_char(s[i++], 0);
 }
