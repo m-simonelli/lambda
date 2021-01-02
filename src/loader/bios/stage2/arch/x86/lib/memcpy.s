@@ -20,11 +20,11 @@ memcpy:
     mov edi, eax ; dest
     mov esi, edx ; src
 
-    ; for the case when cnt < 4 bytes
+    ; for the case when cnt < 16 bytes
     cmp ecx, 0x10
     jb .tail
 
-    ; check for case 3
+    ; check for case 2
     cmp edi, esi
     ja .reverse
     ; predecrement
