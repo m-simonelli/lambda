@@ -29,6 +29,8 @@ memcpy:
     ja .reverse
     ; predecrement
     sub ecx, 0x10
+
+    align 16 ; Assembly/Compiler Coding Rule 12 - All branch targets should be 16-byte aligned.
   .forward_copy_loop:
     sub ecx, 0x10
     ; move in 4x4 groups
@@ -49,12 +51,15 @@ memcpy:
     add ecx, 0x10
     jmp .tail
   
+    align 16
   .reverse:
     ; start at tail of src/dest
     add edi, ecx
     add esi, ecx
     ; predecrement
     sub ecx, 0x10
+
+    align 16
   .reverse_copy_loop:
     sub ecx, 0x10
     ; move in 4x4 groups
@@ -77,6 +82,7 @@ memcpy:
     sub edi, ecx
     sub esi, ecx
 
+    align 16
   .tail:
     ; it's not really worth doing optimizations here for up to 16 bytes
     rep movsb
