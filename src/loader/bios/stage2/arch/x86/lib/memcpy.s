@@ -97,5 +97,4 @@ memcpy:
 
 ; cases:
 ;   1. dest < src   => copy 4 bytes at a time with no issues
-;   2. dest == src  => return
-;   3. dest > src   => start at tail
+;   2. dest > src   => start at tail
