@@ -11,7 +11,7 @@ start:
     ; which will be 90 bytes at largest for a FAT16 BPB
     times 88 db 0
 
-align 4
+    align 4
   .bpb_end:
     cli
     cld
@@ -39,7 +39,7 @@ align 4
 
     ; check for disk extensions support
     call check_drive_ext_supported
-    
+
     ; no guarantee on upper half of esp
     mov esp, 0x7c00
 
