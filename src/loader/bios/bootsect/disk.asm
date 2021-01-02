@@ -86,7 +86,6 @@ check_drive_ext_supported:
   .err:
     call rm_err
 
-
 align 4
 ; 16 byte packet size
 ; 1 block count

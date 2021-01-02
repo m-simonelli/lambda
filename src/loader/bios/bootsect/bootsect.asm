@@ -87,7 +87,6 @@ pmode_start:
 
     jmp 0x9000
 
-
 ; boot signature
 times 510-($-$$) db 0
 dw 0xaa55
