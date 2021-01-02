@@ -11,12 +11,6 @@ memcpy:
     pop edx ; src
     pop ecx ; cnt
 
-    ; check for case 2
-    cmp eax, edx
-    jne .neq
-    ret
-
-  .neq:
     push ebp
     push ebx
     push edi
