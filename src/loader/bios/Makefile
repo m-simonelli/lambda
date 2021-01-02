@@ -35,7 +35,7 @@ S2_C_SRC=		${S2_DIR}/entry.c					\
 				${S2_DIR}/drivers/display/vga/vga.c	\
 				${S2_DIR}/drivers/io/ports.c
 
-S2_SRC=${S2_ASM_SRC} ${S2_C_SRC}
+S2_SRC=			${S2_ASM_SRC} ${S2_C_SRC}
 S2_OBJ=			${S2_ASM_SRC:.s=.o}	\
 				${S2_C_SRC:.c=.o}
 S2_SEC_CNT=`wc -c < ${S2_OUT} | awk '{printf("%.0f\n", ($$1+511)/512)}'`
