@@ -4,6 +4,9 @@
 ; You are free to redistribute/modify this code under the
 ; terms of the GPL version 3 (see the file LICENSE)
 
+[bits 32]
+global memset
+
 memset:
     push ebp
     mov ebp, esp
