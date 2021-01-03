@@ -5,6 +5,7 @@
 
 AS=nasm
 PREFIX=x86_64-linux-gnu
+AS_FMT=elf64
 CC=${PREFIX}-gcc
 # mingw throws a fit if you try and operate on a non pe output
 LD=${PREFIX}-ld
@@ -66,10 +67,18 @@ LD_FLAGS=	-shared									\
 			-T${GNU_EFI_PATH}/elf_${ARCH}_efi.lds
 
 SRC=		entry.c
-OBJS=${SRC:.c=.o}
+SRC_ASM=	arch/x86/lib/memcpy.s					\
+			arch/x86/lib/memset.s
+OBJS=${SRC:.c=.o} ${SRC_ASM:.s=.o}
 
 
 all: ${OUT_EFI}
+
+%.o: %.c
+	${CC} ${CFLAGS} -c $^ -o $@
+
+%.o: %.s
+	${AS} -f ${AS_FMT} $^ -o $@
 
 ${OUT_LD}: ${OBJS}
 	${LD} ${LD_FLAGS} ${GNU_EFI_PATH}/crt0-efi-${ARCH}.o ${OBJS} -o $@ -lefi -lgnuefi
