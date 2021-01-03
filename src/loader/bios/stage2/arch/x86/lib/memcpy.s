@@ -7,14 +7,18 @@
 global memcpy
 
 memcpy:
-    pop eax ; dest
-    pop edx ; src
-    pop ecx ; cnt
-
     push ebp
+    mov ebp, esp
+
+    mov eax, [ebp + 8]  ; dest
+    mov edx, [ebp + 12] ; src
+    mov ecx, [ebp + 16] ; cnt
+
+    push ebp ; ebp gets clobbered, this should get popped to esp in epilogue
     push ebx
     push edi
     push esi
+    push eax ; rval
 
     mov edi, eax ; dest
     mov esi, edx ; src
@@ -84,8 +88,13 @@ memcpy:
     align 16
   .tail:
     ; it's not really worth doing optimizations here for up to 16 bytes
+
+    ; todo: on second thought, it might actually be worth it since rep when
+    ; ecx < 64 induces large performance penalties
     rep movsb
     
+    pop eax ; rval
+    pop esp ; from push ebp
     pop esi
     pop edi
     pop ebx

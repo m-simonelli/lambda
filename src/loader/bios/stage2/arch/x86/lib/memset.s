@@ -62,6 +62,8 @@ memset:
 
     align 16
   .done:
+    mov esp, ebp
+    
     pop esi
     pop edi
     pop ebp
