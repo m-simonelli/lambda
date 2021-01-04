@@ -5,7 +5,7 @@
 
 %define s2_vaddr 0xFFFFFFFFC0000000
 
-%include "arch/x86/lib/gdt.inc"
+%include "arch/x86/gdt.inc"
 
 global start
 global halt
