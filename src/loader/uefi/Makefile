@@ -67,8 +67,7 @@ LD_FLAGS=	-shared									\
 			-T${GNU_EFI_PATH}/elf_${ARCH}_efi.lds
 
 SRC=		entry.c
-SRC_ASM=	arch/x86/lib/memcpy.s					\
-			arch/x86/lib/memset.s
+SRC_ASM=
 OBJS=${SRC:.c=.o} ${SRC_ASM:.s=.o}
 
 

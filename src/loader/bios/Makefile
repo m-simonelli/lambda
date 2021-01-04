@@ -34,7 +34,7 @@ BOOTSECT_SRC=	${BOOTSECT_DIR}/bootsect.asm		\
 S2_DIR=stage2
 S2_OUT=stage2.bin
 S2_GEN=
-S2_ASM_SRC=		${S2_DIR}/start.s					\
+S2_ASM_SRC=		${S2_DIR}/arch/x86/start.s			\
 				${S2_DIR}/arch/x86/lib/memcpy.s		\
 				${S2_DIR}/arch/x86/lib/memset.s
 S2_C_SRC=		${S2_DIR}/entry.c					\
@@ -62,8 +62,8 @@ CC_FLAGS=	-Istage2/include		\
 			-mno-avx512f			\
 			-mno-3dnow				\
 			-mno-red-zone			\
-			-m32					\
-			-fstack-protector-strong\
+			-mcmodel=kernel			\
+			-m64					\
 			-fno-pie
 
 define write_defs_inc
@@ -88,13 +88,13 @@ ${S2_DIR}/%.o: ${S2_DIR}/%.c
 	${CC} ${CC_FLAGS} -ffreestanding -c $< -o $@
 
 ${S2_DIR}/%.o: ${S2_DIR}/%.s
-	${AS} -f elf32 $< -o $@
+	${AS} -f elf64 -I${S2_DIR} $< -o $@
 
 ${S2_LD_SCRIPT}: ${S2_LD_SCRIPT_GEN}
 	gcc -E -x c $< | grep -v '^#' > $@
 
 ${S2_OUT}: ${S2_OBJ} ${S2_LD_SCRIPT}
-	${LD} -m elf_i386 -o $@ -T${S2_LD_SCRIPT} ${S2_OBJ}
+	${LD} -m elf_x86_64 -o $@ -T${S2_LD_SCRIPT} ${S2_OBJ}
 
 run_qemu: all
 	${QEMU} -m 512 -drive file=${OUT_BIN},format=raw,index=0,media=disk

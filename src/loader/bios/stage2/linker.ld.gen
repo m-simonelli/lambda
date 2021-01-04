@@ -1,9 +1,11 @@
 #define S2_LOAD_ADDR 0x9000
+#define S2_VADDR 0xFFFFFFFFC0000000
 
 OUTPUT_FORMAT(binary)
 
 SECTIONS {
-    . = S2_LOAD_ADDR;
+    s2_vaddr = S2_VADDR;
+    . = S2_LOAD_ADDR + S2_VADDR;
     .s2entry : {
       *(.s2entry)
     }
