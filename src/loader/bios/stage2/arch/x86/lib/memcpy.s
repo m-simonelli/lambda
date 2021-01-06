@@ -3,104 +3,173 @@
 ; You are free to redistribute/modify this code under the 
 ; terms of the GPL version 3 (see the file LICENSE)
 
-[bits 32]
+[bits 64]
 global memcpy
 
+section .text
+
 memcpy:
-    push ebp
-    mov ebp, esp
+    push rbp
+    mov rbp, rsp
 
-    mov eax, [ebp + 8]  ; dest
-    mov edx, [ebp + 12] ; src
-    mov ecx, [ebp + 16] ; cnt
+    ; rdi: dst
+    ; rsi: src
+    ; rdx: count
 
-    push ebp ; ebp gets clobbered, this should get popped to esp in epilogue
-    push ebx
-    push edi
-    push esi
-    push eax ; rval
+    mov rax, rdi ; rval
 
-    mov edi, eax ; dest
-    mov esi, edx ; src
-
-    ; for the case when cnt < 16 bytes
-    cmp ecx, 16
+    ; for the case when cnt < 32 bytes
+    cmp rdx, 32
     jb .tail
 
     ; check for case 2
-    cmp edi, esi
+    cmp rdi, rsi
     ja .reverse
     ; predecrement
-    lea ecx, [ecx - 16]
+    lea rdx, [rdx - 32]
 
     align 16 ; Assembly/Compiler Coding Rule 12 - All branch targets should be 16-byte aligned.
   .forward_copy_loop:
-    sub ecx, 16
-    ; move in 4x4 groups
+    sub rdx, 32
+    ; move in 4x8 groups
     ; load
-    mov eax, [esi + 0]
-    mov ebx, [esi + 4]
-    mov edx, [esi + 8]
-    mov ebp, [esi + 12]
-    lea esi, [esi + 16] ; equivalent to add esi, 16 but lea is faster
+    mov r8,  [rsi + 0]
+    mov r9,  [rsi + 8]
+    mov r10, [rsi + 16]
+    mov r11, [rsi + 24]
+    lea rsi, [rsi + 32] ; equivalent to add rsi, 32 but lea is faster
     ; store
-    mov [edi + 0],  eax
-    mov [edi + 4],  ebx
-    mov [edi + 8],  edx
-    mov [edi + 12], ebp
-    lea edi, [edi + 16]
-    ; if the sub ecx, 0x10 didn't underflow, loop
+    mov [rdi + 0],  r8
+    mov [rdi + 8],  r9
+    mov [rdi + 16], r10
+    mov [rdi + 24], r11
+    lea rdi, [rdi + 32]
+    ; if the sub rdx, 0x10 didn't underflow, loop
     jae .forward_copy_loop
-    lea ecx, [ecx + 16]
+    lea rdx, [rdx + 32]
+
     jmp .tail
   
     align 16
   .reverse:
     ; start at tail of src/dest
-    add edi, ecx
-    add esi, ecx
+    add rdi, rdx
+    add rsi, rdx
     ; predecrement
-    lea ecx, [ecx - 16]
+    lea rdx, [rdx - 32]
 
     align 16
   .reverse_copy_loop:
-    sub ecx, 16
-    ; move in 4x4 groups
+    sub rdx, 32
+    ; move in 4x8 groups
     ; load
-    mov eax, [esi - 0]
-    mov ebx, [esi - 4]
-    mov edx, [esi - 8]
-    mov ebp, [esi - 12]
-    lea esi, [esi - 16] ; equivalent to add esi, 16 but lea is faster
+    mov r8,  [rsi - 0]
+    mov r9,  [rsi - 8]
+    mov r10, [rsi - 16]
+    mov r11, [rsi - 24]
+    lea rsi, [rsi - 32]
     ; store
-    mov [edi - 0],  eax
-    mov [edi - 4],  ebx
-    mov [edi - 8],  edx
-    mov [edi - 12], ebp
-    lea edi, [edi - 16]
+    mov [rdi - 0],  r8
+    mov [rdi - 8],  r9
+    mov [rdi - 16], r10
+    mov [rdi - 24], r11
+    lea rdi, [rdi - 32]
     jae .reverse_copy_loop
   
     ; .tail only handles forward copy, fix pointers
-    lea ecx, [ecx + 16]
-    sub edi, ecx
-    sub esi, ecx
+    lea rdx, [rdx + 32]
+    sub rdi, rdx
+    sub rsi, rdx
 
     align 16
   .tail:
-    ; it's not really worth doing optimizations here for up to 16 bytes
-
-    ; todo: on second thought, it might actually be worth it since rep when
-    ; ecx < 64 induces large performance penalties
+    mov rcx, rdx
     rep movsb
-    
-    pop eax ; rval
-    pop esp ; from push ebp
-    pop esi
-    pop edi
-    pop ebx
-    pop ebp
 
+    mov rsp, rbp
+    pop rbp
     ret
+
+; this *maybe* works and probably isn't even more efficient lmao
+; haven't tested so this is hypothesizing, but i think this is less efficient
+; since it'll likely make it hard for the branch predictor to guess right, and
+; it takes up *way* too many bytes so i-cache/uop cache misses are more likely
+; i'll benchmark it later
+; also this doesn't decompile nicely :(
+%if 0
+    lea rcx, [_memcpy_tail_jmp_table]
+    jmp [rcx + rdx * 8]
+    
+  .tail_b32:
+    ; move 16 bytes, then handle the rest with the jump table again
+    mov r8,  [rsi + 0]
+    mov r9,  [rsi + 8]
+
+    sub rdx, 16
+    add rsi, 16
+    add rdi, 16
+
+    mov [rdi + 0], r8
+    mov [rdi + 8], r9
+
+    jmp [rcx + rdx * 8]
+
+  .tail_b16:
+    ; move 8 bytes, then handle the rest with the jump table again
+    mov r8,  [rsi + 0]
+
+    sub rdx, 8
+    add rsi, 8
+    add rdi, 8
+
+    mov [rdi + 0], r8
+
+    jmp [rcx + rdx * 8]
+
+  .tail_b8:
+    ; move 4 bytes, then handle the rest with the jump table again
+    mov r8d, [rsi + 0]
+
+    sub rdx, 4
+    add rsi, 4
+    add rdi, 4
+
+    mov [rdi + 0], r8d
+
+    jmp [rcx + rdx * 8]
+  .tail_b4:
+    ; move 2 bytes, then handle the rest with the jump table again
+    mov r8w, [rsi + 0]
+
+    sub rdx, 2
+    add rsi, 2
+    add rdi, 2
+
+    mov [rdi + 0], r8w
+
+    jmp [rcx + rdx * 8]
+  .tail_b2:
+    ; move 1 byte
+    mov r8b, [rsi + 0]
+    mov [rdi + 0], r8b
+
+  .done:
+    mov rsp, rbp
+    pop rbp
+    ret
+
+section .data
+
+; cursed jump table
+; 256 bytes 8)
+_memcpy_tail_jmp_table:
+    times 1  dq memcpy.done
+    times 1  dq memcpy.tail_b2
+    times 2  dq memcpy.tail_b4
+    times 4  dq memcpy.tail_b8
+    times 8  dq memcpy.tail_b16
+    times 16 dq memcpy.tail_b32
+%endif
 
 ; cases:
 ;   1. dest < src   => copy 4 bytes at a time with no issues
